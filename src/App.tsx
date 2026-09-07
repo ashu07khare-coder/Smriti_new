@@ -1,4 +1,4 @@
-import { useState, type ReactNode } from 'react';
+import { useEffect, useState, type ReactNode } from 'react';
 import {
   ArrowLeft,
   ArrowRight,
@@ -13,10 +13,12 @@ import {
   Languages,
   Lightbulb,
   Mic,
+  Moon,
   Phone,
   Play,
   Share2,
   Sparkles,
+  Sun,
   UserRound,
   Volume2,
   X,
@@ -42,6 +44,11 @@ function App() {
   const [medicineDone, setMedicineDone] = useState(false);
   const [isListening, setIsListening] = useState(false);
   const [hintVisible, setHintVisible] = useState(false);
+  const [darkMode, setDarkMode] = useState(() => localStorage.getItem('smriti-dark-mode') === 'true');
+
+  useEffect(() => {
+    localStorage.setItem('smriti-dark-mode', String(darkMode));
+  }, [darkMode]);
 
   const navigate = (nextView: View) => {
     setView(nextView);
@@ -61,12 +68,12 @@ function App() {
   };
 
   return (
-    <main className="app-shell">
+    <main className={`app-shell ${darkMode ? 'dark-mode' : ''}`}>
       <div className="ambient ambient-one" />
       <div className="ambient ambient-two" />
       <header className="topbar">
         <button className="brand" onClick={() => navigate('home')} aria-label="Go to Smriti home">
-          <span className="brand-mark"><Heart size={18} fill="currentColor" /></span>
+          <span className="brand-mark"><img src="/smriti-mark.png" alt="" /></span>
           <span>smriti</span>
         </button>
         <div className="topbar-actions">
@@ -86,6 +93,9 @@ function App() {
               </div>
             )}
           </div>
+          <button className="theme-toggle" onClick={() => setDarkMode((enabled) => !enabled)} aria-label={darkMode ? 'Use light mode' : 'Use dark mode'} aria-pressed={darkMode}>
+            {darkMode ? <Sun size={18} /> : <Moon size={18} />}
+          </button>
           <button className="circle-avatar" aria-label="Profile"><UserRound size={18} /></button>
         </div>
       </header>

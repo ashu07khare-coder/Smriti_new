@@ -1,0 +1,12 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 768 768" role="img" aria-label="Smriti flower mark">
+  <rect width="768" height="768" rx="86" fill="#ffc400"/>
+  <g fill="#193b3a">
+    <ellipse cx="384" cy="258" rx="91" ry="143"/>
+    <ellipse cx="384" cy="510" rx="91" ry="143"/>
+    <ellipse cx="258" cy="384" rx="143" ry="91"/>
+    <ellipse cx="510" cy="384" rx="143" ry="91"/>
+    <ellipse cx="294" cy="294" rx="91" ry="143" transform="rotate(-45 294 294)"/>
+  </g>
+  <circle cx="384" cy="384" r="38" fill="#ffc400"/>
+  <path d="M677 659l7 19 19 7-19 7-7 19-7-19-19-7 19-7z" fill="#ffe98a"/>
+</svg>

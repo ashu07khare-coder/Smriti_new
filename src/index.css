@@ -23,12 +23,14 @@ button { font: inherit; cursor: pointer; }
 .topbar, .content-wrap, .bottom-nav { position: relative; z-index: 1; }
 .topbar { max-width: 1040px; margin: 0 auto; padding: 28px 34px 14px; display: flex; justify-content: space-between; align-items: center; }
 .brand { display: flex; gap: 10px; align-items: center; border: 0; background: none; color: #173e38; font-size: 21px; font-weight: 700; letter-spacing: -.7px; }
-.brand-mark { width: 33px; height: 33px; border-radius: 11px; display: grid; place-items: center; color: white; background: #289e7d; box-shadow: 0 7px 18px #289e7d36; }
+.brand-mark { width: 33px; height: 33px; overflow: hidden; border-radius: 11px; display: grid; place-items: center; box-shadow: 0 7px 18px #289e7d36; }
+.brand-mark img { display: block; width: 100%; height: 100%; object-fit: cover; }
 .topbar-actions { display: flex; align-items: center; gap: 12px; }
 .language-wrap { position: relative; }
 .language-button, .circle-avatar, .quiet-button { border: 1px solid #d5e0da; background: rgba(255,255,255,.65); color: #325f56; }
 .language-button { height: 40px; padding: 0 13px; border-radius: 14px; display: flex; align-items: center; gap: 7px; font-size: 13px; font-weight: 600; }
 .circle-avatar { height: 40px; width: 40px; border-radius: 50%; display: grid; place-items: center; }
+.theme-toggle { width: 40px; height: 40px; display: grid; place-items: center; border: 1px solid #d5e0da; border-radius: 50%; color: #325f56; background: rgba(255,255,255,.65); }
 .language-menu { position: absolute; right: 0; top: 48px; width: 168px; padding: 6px; background: white; border: 1px solid #dfe8e1; border-radius: 14px; box-shadow: 0 12px 30px #173e3818; z-index: 4; }
 .language-menu button { width: 100%; display: flex; justify-content: space-between; padding: 10px; border: 0; background: none; color: #38635a; text-align: left; border-radius: 9px; font-size: 13px; }
 .language-menu button:hover, .language-menu button.selected { background: #eaf5ef; color: #168364; }
@@ -183,6 +185,99 @@ h2 { margin-bottom: 0; font-family: Fraunces, Georgia, serif; letter-spacing: -.
 .recall-option:disabled { cursor: default; }
 .recall-option-icon { width: 48px; height: 48px; display: grid; place-items: center; border-radius: 14px; flex-shrink: 0; }
 .recall-option-label { font-size: 16px; font-weight: 700; font-family: Fraunces, Georgia, serif; color: #2b5b51; }
+
+/* Bright yellow light theme inspired by the Smriti flower mark. */
+.app-shell:not(.dark-mode) { color: #263b32; background: linear-gradient(135deg, #fffbed 0%, #fff6b8 52%, #ffe36b 100%); }
+.app-shell:not(.dark-mode) .ambient-one { background: #ffe04f; opacity: .34; }
+.app-shell:not(.dark-mode) .ambient-two { background: #fff0a3; opacity: .7; }
+.app-shell:not(.dark-mode) .brand, .app-shell:not(.dark-mode) h1 { color: #193b3a; }
+.app-shell:not(.dark-mode) .eyebrow, .app-shell:not(.dark-mode) .card-kicker { color: #6f6a35; }
+.app-shell:not(.dark-mode) .language-button, .app-shell:not(.dark-mode) .circle-avatar, .app-shell:not(.dark-mode) .quiet-button, .app-shell:not(.dark-mode) .theme-toggle, .app-shell:not(.dark-mode) .instructions-button { border-color: #e3ce62; color: #35483b; background: rgba(255,255,238,.74); }
+.app-shell:not(.dark-mode) .language-menu { border-color: #e3ce62; background: #fffdf0; box-shadow: 0 12px 30px #806c1618; }
+.app-shell:not(.dark-mode) .language-menu button { color: #45553b; }
+.app-shell:not(.dark-mode) .language-menu button:hover, .app-shell:not(.dark-mode) .language-menu button.selected, .app-shell:not(.dark-mode) .instructions-button:hover { background: #fff0a3; color: #695800; }
+.app-shell:not(.dark-mode) .offline-pill { color: #665800; background: #ffec82; }
+.app-shell:not(.dark-mode) .welcome-card, .app-shell:not(.dark-mode) .category-prompt-card { background: #fff0a3; }
+.app-shell:not(.dark-mode) .welcome-icon { color: #193b3a; background: #ffc400; }
+.app-shell:not(.dark-mode) .welcome-copy p:not(.card-kicker), .app-shell:not(.dark-mode) .games-hub .games-intro { color: #59613d; }
+.app-shell:not(.dark-mode) .listen-button, .app-shell:not(.dark-mode) .name-submit { color: #fffdf0; background: #193b3a; }
+.app-shell:not(.dark-mode) .listen-button:hover { background: #31584a; }
+.app-shell:not(.dark-mode) .sun-doodle { border-color: #f5d33b; }
+.app-shell:not(.dark-mode) .plan-card, .app-shell:not(.dark-mode) .game-card, .app-shell:not(.dark-mode) .chart-card { border-color: #eadb87; background: rgba(255,255,245,.78); }
+.app-shell:not(.dark-mode) .completed-card { background: #fff4af; }
+.app-shell:not(.dark-mode) .plan-copy p, .app-shell:not(.dark-mode) .circle-person, .app-shell:not(.dark-mode) .updated-time, .app-shell:not(.dark-mode) .progress-meta, .app-shell:not(.dark-mode) .memory-caption, .app-shell:not(.dark-mode) .alert-card p, .app-shell:not(.dark-mode) .trend-section .section-title-row p, .app-shell:not(.dark-mode) .game-card-copy p, .app-shell:not(.dark-mode) .completion-subtitle, .app-shell:not(.dark-mode) .routine-instruction, .app-shell:not(.dark-mode) .recall-question p:last-child { color: #68704f; }
+.app-shell:not(.dark-mode) .check-button, .app-shell:not(.dark-mode) .done-button, .app-shell:not(.dark-mode) .story-play-button, .app-shell:not(.dark-mode) .modal-got-it { background: #193b3a; }
+.app-shell:not(.dark-mode) .speak-card { color: #193b3a; background: #ffc400; box-shadow: 0 14px 24px #c69b0038; }
+.app-shell:not(.dark-mode) .speak-card:hover { box-shadow: 0 17px 30px #c69b0050; }
+.app-shell:not(.dark-mode) .speak-card .mic-orb { color: #ffc400; background: #193b3a; box-shadow: 0 0 0 4px #ffe36b; }
+.app-shell:not(.dark-mode) .speak-card .speak-copy small { color: #31584a; }
+.app-shell:not(.dark-mode) .speak-card .speak-pulse { background: #ffe36b; }
+.app-shell:not(.dark-mode) .inline-action, .app-shell:not(.dark-mode) .back-button, .app-shell:not(.dark-mode) .secondary-action, .app-shell:not(.dark-mode) .warm-acknowledgment { color: #857000; }
+.app-shell:not(.dark-mode) .bottom-nav { border-color: #e3ce62; background: #fffdf0d9; box-shadow: 0 10px 30px #806c1626; }
+.app-shell:not(.dark-mode) .nav-button { color: #7e835f; }
+.app-shell:not(.dark-mode) .nav-button.active { color: #193b3a; background: #ffe36b; }
+.app-shell:not(.dark-mode) .progress-track { background: #f2e8ae; }
+.app-shell:not(.dark-mode) .progress-track span { background: #e0ad00; }
+.app-shell:not(.dark-mode) .memory-card, .app-shell:not(.dark-mode) .story-card { background: #ffe8a6; }
+.app-shell:not(.dark-mode) .memory-art { background: #fff1bf; }
+.app-shell:not(.dark-mode) .question-block p:last-child, .app-shell:not(.dark-mode) .encouragement, .app-shell:not(.dark-mode) .human-note { color: #68704f; }
+.app-shell:not(.dark-mode) .alert-card, .app-shell:not(.dark-mode) .category-cue { background: #fff0b8; }
+.app-shell:not(.dark-mode) .grid-line { stroke: #eadb87; }
+.app-shell:not(.dark-mode) .trend-line { stroke: #193b3a; }
+.app-shell:not(.dark-mode) .trend-point { fill: #ffc400; stroke: #fffdf0; }
+.app-shell:not(.dark-mode) .day-chip, .app-shell:not(.dark-mode) .game-time, .app-shell:not(.dark-mode) .answer-tag, .app-shell:not(.dark-mode) .step-number { color: #665800; background: #fff0a3; }
+.app-shell:not(.dark-mode) .today-card { color: #29493c; background: #fff0a3; }
+.app-shell:not(.dark-mode) .answer-option, .app-shell:not(.dark-mode) .recall-option, .app-shell:not(.dark-mode) .routine-card, .app-shell:not(.dark-mode) .match-card-face { border-color: #eadb87; background: rgba(255,255,245,.86); color: #29493c; }
+.app-shell:not(.dark-mode) .answer-option.correct, .app-shell:not(.dark-mode) .recall-option.correct, .app-shell:not(.dark-mode) .routine-card.placed, .app-shell:not(.dark-mode) .match-card.matched .match-card-face { background: #fff0a3; }
+.app-shell:not(.dark-mode) .answer-option.selected, .app-shell:not(.dark-mode) .recall-option.selected { background: #ffe8a6; }
+.app-shell:not(.dark-mode) .voice-note-trigger, .app-shell:not(.dark-mode) .story-replay, .app-shell:not(.dark-mode) .suggestion-chip { border-color: #e3ce62; color: #756300; background: rgba(255,255,245,.7); }
+.app-shell:not(.dark-mode) .voice-note-trigger:hover, .app-shell:not(.dark-mode) .story-replay:hover, .app-shell:not(.dark-mode) .suggestion-chip:hover { background: #fff0a3; }
+.app-shell:not(.dark-mode) .name-input { border-color: #e3ce62; color: #193b3a; background: rgba(255,255,245,.86); }
+.app-shell:not(.dark-mode) .story-illustration { background: #ffe36b; }
+
+/* Dark theme keeps the warm, calm palette while increasing contrast. */
+.app-shell.dark-mode { color: #e6eee9; background: linear-gradient(135deg, #172522 0%, #1b2d29 52%, #20352e 100%); }
+.dark-mode .ambient-one { background: #24463b; opacity: .55; }
+.dark-mode .ambient-two { background: #493a2b; opacity: .45; }
+.dark-mode .brand, .dark-mode h1 { color: #edf6f0; }
+.dark-mode h2, .dark-mode h3, .dark-mode .plan-copy h3, .dark-mode .alert-card h3, .dark-mode .modal-header h3 { color: #e6eee9; }
+.dark-mode .eyebrow, .dark-mode .card-kicker { color: #9bb5aa; }
+.dark-mode .language-button, .dark-mode .circle-avatar, .dark-mode .quiet-button, .dark-mode .theme-toggle, .dark-mode .instructions-button { border-color: #3d5850; color: #c2d7cd; background: rgba(34,56,49,.8); }
+.dark-mode .language-menu, .dark-mode .modal-card { border-color: #405a51; background: #223832; box-shadow: 0 12px 30px #07130f66; }
+.dark-mode .language-menu button { color: #c2d7cd; }
+.dark-mode .language-menu button:hover, .dark-mode .language-menu button.selected, .dark-mode .instructions-button:hover { background: #2c5044; color: #78d2b1; }
+.dark-mode .offline-pill { color: #9de0c4; background: #234b3e; }
+.dark-mode .welcome-card, .dark-mode .category-prompt-card { background: #25483d; }
+.dark-mode .welcome-copy p:not(.card-kicker), .dark-mode .games-hub .games-intro { color: #b5cec2; }
+.dark-mode .sun-doodle { border-color: #3e7360; }
+.dark-mode .plan-card, .dark-mode .game-card, .dark-mode .chart-card { border-color: #385249; background: rgba(34,56,49,.86); }
+.dark-mode .completed-card { background: #244a3e; }
+.dark-mode .plan-copy p, .dark-mode .circle-person, .dark-mode .updated-time, .dark-mode .progress-meta, .dark-mode .memory-caption, .dark-mode .alert-card p, .dark-mode .trend-section .section-title-row p, .dark-mode .game-card-copy p, .dark-mode .completion-subtitle, .dark-mode .routine-instruction, .dark-mode .recall-question p:last-child { color: #9eb8ad; }
+.dark-mode .inline-action, .dark-mode .back-button, .dark-mode .secondary-action { color: #70d0ab; }
+.dark-mode .bottom-nav { border-color: #3b574e; background: #20362fcc; box-shadow: 0 10px 30px #07130f66; }
+.dark-mode .nav-button { color: #91aaa0; }
+.dark-mode .nav-button.active { color: #7bdbb5; background: #2b5547; }
+.dark-mode .progress-track, .dark-mode .routine-placed { background: #2a4039; border-color: #486258; }
+.dark-mode .memory-card, .dark-mode .story-card { background: #4a3b2d; }
+.dark-mode .memory-art { background: #5c4837; }
+.dark-mode .question-block p:last-child, .dark-mode .encouragement, .dark-mode .human-note { color: #a9c1b6; }
+.dark-mode .hint-card, .dark-mode .voice-note-card { background: #25483d; color: #d8ebe2; }
+.dark-mode .alert-card, .dark-mode .category-cue { background: #493a2b; color: #f2d6a7; }
+.dark-mode .grid-line { stroke: #395148; }
+.dark-mode .trend-point { stroke: #223832; }
+.dark-mode .day-chip, .dark-mode .game-time, .dark-mode .answer-tag, .dark-mode .step-number { color: #9de0c4; background: #285344; }
+.dark-mode .today-card { color: #d6ebe1; background: #25483d; }
+.dark-mode .answer-option, .dark-mode .recall-option, .dark-mode .routine-card, .dark-mode .match-card-face { border-color: #405a51; background: rgba(34,56,49,.9); color: #d8ebe2; }
+.dark-mode .answer-option.correct, .dark-mode .recall-option.correct, .dark-mode .routine-card.placed, .dark-mode .match-card.matched .match-card-face { background: #285344; }
+.dark-mode .answer-option.selected, .dark-mode .recall-option.selected { background: #58462f; }
+.dark-mode .voice-note-trigger, .dark-mode .story-replay, .dark-mode .suggestion-chip { border-color: #49675b; color: #8cd9b7; background: rgba(34,56,49,.75); }
+.dark-mode .voice-note-trigger:hover, .dark-mode .story-replay:hover, .dark-mode .suggestion-chip:hover { background: #2c5044; }
+.dark-mode .name-input { border-color: #49675b; color: #e6eee9; background: rgba(34,56,49,.9); }
+.dark-mode .story-text, .dark-mode .recall-option-label { color: #e2c9a5; }
+.dark-mode .modal-header button { border-color: #49675b; color: #b6cabe; }
+.dark-mode .modal-step span:last-child { color: #c2d7cd; }
+.dark-mode .story-illustration { background: #58462f; }
+.dark-mode .story-progress { background: #66523b; }
 
 @media (min-width: 850px) { .content-wrap { padding-top: 32px; }.bottom-nav { position: fixed; } }
 @media (max-width: 560px) { .topbar { padding: 22px 19px 8px; }.content-wrap { padding: 18px 19px 108px; }.language-button { padding: 0 10px; }.language-button span { max-width: 70px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }.welcome-card { padding: 21px 18px; }.welcome-icon { flex-basis: 50px; width: 50px; height: 50px; }.welcome-copy h2 { font-size: 23px; }.welcome-copy p:not(.card-kicker) { font-size: 13px; }.memory-art { height: 210px; }.circle-actions { grid-template-columns: 1fr; }.updated-time { font-size: 10px; }.match-grid { grid-template-columns: repeat(2, 1fr); }.bottom-nav { width: min(100% - 24px, 460px); } }
