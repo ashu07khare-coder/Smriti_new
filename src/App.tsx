@@ -30,6 +30,8 @@ import { MatchPairs } from '@/games/MatchPairs';
 import { DailyRoutine } from '@/games/DailyRoutine';
 import { NameThree } from '@/games/NameThree';
 import { StoryRecall } from '@/games/StoryRecall';
+import { PictureBingo } from '@/games/PictureBingo';
+import { Dominoes } from '@/games/Dominoes';
 import type { GameId, Language } from '@/games/shared';
 
 type View = 'home' | 'exercise' | 'circle' | 'games';
@@ -125,6 +127,8 @@ function App() {
         {view === 'games' && activeGame === 'daily-routine' && <DailyRoutine onBack={backToGames} />}
         {view === 'games' && activeGame === 'name-three' && <NameThree language={language} onBack={backToGames} />}
         {view === 'games' && activeGame === 'story-recall' && <StoryRecall language={language} onBack={backToGames} />}
+        {view === 'games' && activeGame === 'picture-bingo' && <PictureBingo language={language} onBack={backToGames} />}
+        {view === 'games' && activeGame === 'dominoes' && <Dominoes language={language} onBack={backToGames} />}
       </section>
 
       <nav className="bottom-nav" aria-label="Main navigation">

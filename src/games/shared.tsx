@@ -5,7 +5,7 @@ export type Language = 'Assamese' | 'Bodo' | 'Khasi' | 'Mizo' | 'Manipuri' | 'Na
 
 export const languages: Language[] = ['Assamese', 'Bodo', 'Khasi', 'Mizo', 'Manipuri', 'Nagamese', 'Hindi', 'English'];
 
-export type GameId = 'who-is-this' | 'match-pairs' | 'daily-routine' | 'name-three' | 'story-recall';
+export type GameId = 'who-is-this' | 'match-pairs' | 'daily-routine' | 'name-three' | 'story-recall' | 'picture-bingo' | 'dominoes';
 
 export interface GameInfo {
   id: GameId;

@@ -1,4 +1,4 @@
-import { ArrowRight, Bird, BookOpen, CalendarDays, Heart, MessageCircle, Users } from 'lucide-react';
+import { ArrowRight, Bird, BookOpen, CalendarDays, Grid3x3, Heart, LayoutGrid, MessageCircle, Users } from 'lucide-react';
 import type { GameId, GameInfo, Language } from './shared';
 
 export const gamesList: GameInfo[] = [
@@ -41,6 +41,22 @@ export const gamesList: GameInfo[] = [
     time: '5 minutes',
     icon: <BookOpen size={24} />,
     accent: '#F2B454',
+  },
+  {
+    id: 'picture-bingo',
+    name: 'Picture Bingo',
+    description: 'Listen and find the picture',
+    time: '5 minutes',
+    icon: <Grid3x3 size={24} />,
+    accent: '#F2B454',
+  },
+  {
+    id: 'dominoes',
+    name: 'Dominoes',
+    description: 'Match the matching tiles',
+    time: '5 minutes',
+    icon: <LayoutGrid size={24} />,
+    accent: '#287d9e',
   },
 ];
 
