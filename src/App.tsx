@@ -24,6 +24,7 @@ import {
   X,
 } from 'lucide-react';
 import { GamesHub } from '@/games/GamesHub';
+import { NotificationCenter } from '@/components/NotificationCenter';
 import { WhoIsThis } from '@/games/WhoIsThis';
 import { MatchPairs } from '@/games/MatchPairs';
 import { DailyRoutine } from '@/games/DailyRoutine';
@@ -93,6 +94,7 @@ function App() {
               </div>
             )}
           </div>
+          <NotificationCenter language={language} />
           <button className="theme-toggle" onClick={() => setDarkMode((enabled) => !enabled)} aria-label={darkMode ? 'Use light mode' : 'Use dark mode'} aria-pressed={darkMode}>
             {darkMode ? <Sun size={18} /> : <Moon size={18} />}
           </button>
