@@ -1,4 +1,5 @@
 import { useCallback, useEffect, useRef, useState } from 'react';
+import { createPortal } from 'react-dom';
 import {
   Bell,
   Check,
@@ -208,7 +209,7 @@ export function NotificationCenter({ language }: NotificationCenterProps) {
         {unreadCount > 0 && <span className="notif-badge">{unreadCount}</span>}
       </button>
 
-      {open && (
+      {open && createPortal(
         <>
           <div className="notif-overlay" onClick={() => setOpen(false)} />
           <div
@@ -336,7 +337,8 @@ export function NotificationCenter({ language }: NotificationCenterProps) {
               </button>
             </div>
           </div>
-        </>
+        </>,
+        document.body
       )}
     </>
   );
