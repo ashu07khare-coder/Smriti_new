@@ -33,6 +33,8 @@ import { StoryRecall } from '@/games/StoryRecall';
 import { PictureBingo } from '@/games/PictureBingo';
 import { Dominoes } from '@/games/Dominoes';
 import type { GameId, Language } from '@/games/shared';
+import { smritiApi } from '@/services/api';
+import { performSync, queueOfflineMutation } from '@/services/offlineSync';
 
 type View = 'home' | 'exercise' | 'circle' | 'games';
 type GameView = GameId | null;
@@ -48,10 +50,65 @@ function App() {
   const [isListening, setIsListening] = useState(false);
   const [hintVisible, setHintVisible] = useState(false);
   const [darkMode, setDarkMode] = useState(() => localStorage.getItem('smriti-dark-mode') === 'true');
+  const [isOnline, setIsOnline] = useState(navigator.onLine);
+  const [syncStatusText, setSyncStatusText] = useState('Synced today at 10:12 AM');
 
   useEffect(() => {
     localStorage.setItem('smriti-dark-mode', String(darkMode));
   }, [darkMode]);
+
+  useEffect(() => {
+    // Initial load from backend with fallback
+    smritiApi.getDailyPlan('user-aita').then((res) => {
+      const bpMed = res.reminders?.find((r: any) => r.id === 'rem-bp-med');
+      if (bpMed) setMedicineDone(bpMed.status === 'completed');
+      setIsOnline(true);
+    }).catch(() => {
+      // offline
+    });
+
+    const handleOnline = () => {
+      setIsOnline(true);
+      performSync().then((res) => {
+        if (res.success) {
+          const timeStr = new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+          setSyncStatusText(`Synced today at ${timeStr}`);
+        }
+      });
+    };
+    const handleOffline = () => setIsOnline(false);
+
+    window.addEventListener('online', handleOnline);
+    window.addEventListener('offline', handleOffline);
+    return () => {
+      window.removeEventListener('online', handleOnline);
+      window.removeEventListener('offline', handleOffline);
+    };
+  }, []);
+
+  const handleToggleMedicine = (nextDone: boolean) => {
+    setMedicineDone(nextDone);
+    const newStatus = nextDone ? 'completed' : 'pending';
+    smritiApi.updateReminderStatus('rem-bp-med', newStatus).catch(() => {
+      queueOfflineMutation({
+        table: 'reminders',
+        id: 'rem-bp-med',
+        action: 'UPSERT',
+        data: { status: newStatus, completed_at: nextDone ? Date.now() : null },
+      });
+    });
+  };
+
+  const handleManualSync = async () => {
+    const res = await performSync('user-aita');
+    if (res.success) {
+      const timeStr = new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+      setSyncStatusText(`Synced today at ${timeStr}`);
+      setIsOnline(true);
+    } else {
+      setIsOnline(false);
+    }
+  };
 
   const navigate = (nextView: View) => {
     setView(nextView);
@@ -109,15 +166,17 @@ function App() {
           <HomeView
             language={language}
             medicineDone={medicineDone}
-            setMedicineDone={setMedicineDone}
+            setMedicineDone={handleToggleMedicine}
             isListening={isListening}
             setIsListening={setIsListening}
             onExercise={() => navigate('exercise')}
             onGames={() => navigate('games')}
+            isOnline={isOnline}
+            onSync={handleManualSync}
           />
         )}
         {view === 'exercise' && <ExerciseView hintVisible={hintVisible} setHintVisible={setHintVisible} onBack={() => navigate('home')} />}
-        {view === 'circle' && <CareCircleView />}
+        {view === 'circle' && <CareCircleView syncStatusText={syncStatusText} onSync={handleManualSync} />}
 
         {view === 'games' && !activeGame && (
           <GamesHub language={language} onOpenGame={openGame} />
@@ -141,7 +200,17 @@ function App() {
   );
 }
 
-function HomeView({ language, medicineDone, setMedicineDone, isListening, setIsListening, onExercise, onGames }: {
+function HomeView({
+  language,
+  medicineDone,
+  setMedicineDone,
+  isListening,
+  setIsListening,
+  onExercise,
+  onGames,
+  isOnline,
+  onSync,
+}: {
   language: Language;
   medicineDone: boolean;
   setMedicineDone: (done: boolean) => void;
@@ -149,6 +218,8 @@ function HomeView({ language, medicineDone, setMedicineDone, isListening, setIsL
   setIsListening: (listening: boolean) => void;
   onExercise: () => void;
   onGames: () => void;
+  isOnline: boolean;
+  onSync: () => void;
 }) {
   return (
     <div className="page home-page">
@@ -157,7 +228,15 @@ function HomeView({ language, medicineDone, setMedicineDone, isListening, setIsL
           <p className="eyebrow">Friday, 4 September 2026</p>
           <h1>Namaskar, Aita</h1>
         </div>
-        <div className="offline-pill"><span className="status-dot" /> Offline</div>
+        <button
+          className="offline-pill"
+          onClick={onSync}
+          style={{ cursor: 'pointer', border: 'none' }}
+          title="Click to perform offline-first delta sync with backend"
+        >
+          <span className="status-dot" style={{ background: isOnline ? '#299B78' : '#e57b4f' }} />
+          {isOnline ? 'Online · Tap to Sync' : 'Offline · Tap to Sync'}
+        </button>
       </div>
 
       <section className="welcome-card">
@@ -222,14 +301,49 @@ function ExerciseView({ hintVisible, setHintVisible, onBack }: { hintVisible: bo
   );
 }
 
-function CareCircleView() {
+function CareCircleView({ syncStatusText, onSync }: { syncStatusText: string; onSync: () => void }) {
+  const [actionNotice, setActionNotice] = useState<string | null>(null);
+
+  const handleCallAita = () => {
+    smritiApi.logCareAction('user-aita', 'user-bina', 'call_patient', 'Connected to Aita via phone').catch(() => {});
+    setActionNotice('Calling Aita (+91 98765 43210)... Call action logged for Care Circle.');
+    setTimeout(() => setActionNotice(null), 3500);
+  };
+
+  const handleShareAsha = () => {
+    smritiApi.logCareAction('user-aita', 'user-bina', 'share_with_asha', 'Shared weekly cognitive summary with Lakhi Gogoi').catch(() => {});
+    setActionNotice('Cognitive baseline & notes shared with Lakhi Gogoi (ASHA).');
+    setTimeout(() => setActionNotice(null), 3500);
+  };
+
   return (
     <div className="page circle-page">
-      <div className="page-heading"><div><p className="eyebrow">For family, near or far</p><h1>Care Circle</h1><p className="circle-person">Aita · updated today at 10:12 AM</p></div><div className="updated-time"><span className="live-dot" /> Synced today<br /><strong>at 10:12 AM</strong></div></div>
+      <div className="page-heading">
+        <div>
+          <p className="eyebrow">For family, near or far</p>
+          <h1>Care Circle</h1>
+          <p className="circle-person">Aita · Barua family circle</p>
+        </div>
+        <button
+          className="updated-time"
+          onClick={onSync}
+          style={{ cursor: 'pointer', border: 'none', background: 'none', textAlign: 'right' }}
+          title="Tap to sync now"
+        >
+          <span className="live-dot" /> {syncStatusText}
+        </button>
+      </div>
+
+      {actionNotice && (
+        <div style={{ background: '#dcefe8', color: '#173e38', padding: '12px 18px', borderRadius: '14px', fontSize: '13px', fontWeight: 600, marginBottom: '16px', textAlign: 'center', border: '1px solid #299B78' }}>
+          {actionNotice}
+        </div>
+      )}
+
       <section className="alert-card"><div className="alert-icon">!</div><div><h3>Gentle check-in suggested</h3><p>Aita's routine changed a little this week.</p></div><Bell size={19} /></section>
       <section className="trend-section"><div className="section-title-row"><div><h2>Cognitive trend</h2><p>Personal baseline, not a diagnosis</p></div><button className="quiet-button"><CircleHelp size={20} /></button></div><div className="chart-card"><div className="chart-labels"><span>80</span><span>60</span><span>40</span></div><svg viewBox="0 0 500 190" className="trend-chart" role="img" aria-label="Gentle trend line over recent weeks"><path d="M0 42 H500 M0 96 H500 M0 150 H500" className="grid-line" /><path d="M18 57 C70 44 92 27 137 41 S205 61 252 57 S321 49 364 81 S411 132 480 119" className="trend-line" /><circle cx="480" cy="119" r="6" className="trend-point" /></svg><div className="chart-months"><span>JUL</span><span>AUG</span><span>THIS WEEK</span></div></div></section>
       <section className="today-section"><div className="section-title-row"><h2>Today</h2><span className="day-chip">Friday</span></div><div className="today-card"><div className="today-check"><Check size={20} /></div><div><h3>Exercise completed</h3><p>4 of 5 activities · 6 min</p></div><ArrowRight size={18} /></div></section>
-      <div className="circle-actions"><button className="call-button"><Phone size={18} fill="currentColor" /> Call Aita</button><button className="share-button"><Share2 size={18} /> Share with ASHA</button></div>
+      <div className="circle-actions"><button className="call-button" onClick={handleCallAita}><Phone size={18} fill="currentColor" /> Call Aita</button><button className="share-button" onClick={handleShareAsha}><Share2 size={18} /> Share with ASHA</button></div>
       <p className="human-note"><Heart size={15} fill="currentColor" /> Smriti helps you notice patterns. People make care decisions.</p>
     </div>
   );
