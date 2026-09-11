@@ -9,6 +9,7 @@ import {
 } from './shared';
 import type { Language } from './shared';
 
+
 interface DominoData {
   id: string;
   left: number;
@@ -68,6 +69,9 @@ export function Dominoes({ language: _language, onBack }: { language: Language; 
   const [startTime] = useState(() => Date.now());
   const [hintsUsed, setHintsUsed] = useState(0);
   const [wrongMoves, setWrongMoves] = useState(0);
+  const history = JSON.parse(localStorage.getItem('gameHistory') || '[]');
+  const lastScore = history.length > 0 ? history[history.length - 1].score : 100;
+  const activeDominoSet = lastScore < 50 ? dominoSet.slice(0, 4) : dominoSet;
 
   const leftEnd = board.length > 0 ? board[0].left : null;
   const rightEnd = board.length > 0 ? board[board.length - 1].right : null;
@@ -126,7 +130,10 @@ export function Dominoes({ language: _language, onBack }: { language: Language; 
     if (remaining <= 0) {
       const timeTakenMs = Date.now() - startTime;
       const score = Math.max(0, 100 - wrongMoves * 10 - hintsUsed * 5 - Math.floor(timeTakenMs / 10000));
-      console.log('Round finished:', { gameName: 'Dominoes', score, timeTakenMs, hintsUsed, wrongMoves });
+      const session = { gameName: 'Dominoes', score, timeTakenMs, hintsUsed, wrongMoves, date: new Date().toISOString() };
+      const history = JSON.parse(localStorage.getItem('gameHistory') || '[]');
+      history.push(session);
+      localStorage.setItem('gameHistory', JSON.stringify(history));
       setTimeout(() => setCompleted(true), 800);
     }
   }

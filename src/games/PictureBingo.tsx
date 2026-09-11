@@ -17,7 +17,6 @@ interface PictureItem {
   color: string;
 }
 
-// TODO: wire to backend — replace with GET /api/picture-sets/:id/call-sequence
 const pictureSet: PictureItem[] = [
   { id: 'tea', icon: Coffee, label: 'Tea cup', color: '#E57B4F' },
   { id: 'umbrella', icon: Umbrella, label: 'Umbrella', color: '#287d9e' },
@@ -47,6 +46,9 @@ export function PictureBingo({ language, onBack }: { language: Language; onBack:
   const [hintText, setHintText] = useState<string | null>(null);
   const [completed, setCompleted] = useState(false);
   const [wrongId, setWrongId] = useState<string | null>(null);
+  const [startTime] = useState(() => Date.now());
+  const [hintsUsed, setHintsUsed] = useState(0);
+  const [wrongMoves, setWrongMoves] = useState(0);
 
   const currentCall = callOrder[callIndex];
 
@@ -71,6 +73,16 @@ export function PictureBingo({ language, onBack }: { language: Language; onBack:
     };
   }, []);
 
+  function finishRound() {
+    const timeTakenMs = Date.now() - startTime;
+    const score = Math.max(0, 100 - wrongMoves * 10 - hintsUsed * 5 - Math.floor(timeTakenMs / 10000));
+    const session = { gameName: 'Picture Bingo', score, timeTakenMs, hintsUsed, wrongMoves, date: new Date().toISOString() };
+    const history = JSON.parse(localStorage.getItem('gameHistory') || '[]');
+    history.push(session);
+    localStorage.setItem('gameHistory', JSON.stringify(history));
+    setTimeout(() => setCompleted(true), 800);
+  }
+
   function handleCardClick(item: PictureItem) {
     if (completed || !currentCall) return;
     if (marked.has(item.id)) return;
@@ -81,12 +93,12 @@ export function PictureBingo({ language, onBack }: { language: Language; onBack:
       setMarked(next);
       setWrongId(null);
       if (next.size >= grid.length) {
-        // TODO: wire to backend — POST /api/games/session
-        setTimeout(() => setCompleted(true), 800);
+        finishRound();
       } else {
         setCallIndex((i) => i + 1);
       }
     } else {
+      setWrongMoves((n) => n + 1);
       setWrongId(item.id);
       setTimeout(() => setWrongId(null), 1000);
     }
@@ -104,6 +116,7 @@ export function PictureBingo({ language, onBack }: { language: Language; onBack:
 
   function handleHint() {
     if (!currentCall) return;
+    setHintsUsed((n) => n + 1);
     setHintText(`The picture is "${currentCall.label}". Tap it on your card.`);
     speak(currentCall.label);
   }
@@ -115,14 +128,16 @@ export function PictureBingo({ language, onBack }: { language: Language; onBack:
     setMarked(next);
     setWrongId(null);
     if (next.size >= grid.length) {
-      setTimeout(() => setCompleted(true), 800);
+      finishRound();
     } else {
       setCallIndex((i) => i + 1);
     }
   }
 
   if (completed) {
-    return <CompletionScreen message="Bingo! You found them all" onDone={onBack} />;
+    const timeTakenMs = Date.now() - startTime;
+    const score = Math.max(0, 100 - wrongMoves * 10 - hintsUsed * 5 - Math.floor(timeTakenMs / 10000));
+    return <CompletionScreen message="Bingo! You found them all" onDone={onBack} gameName="Picture Bingo" score={score} timeTakenMs={timeTakenMs} />;
   }
 
   return (

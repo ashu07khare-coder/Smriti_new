@@ -1,4 +1,4 @@
-import { useEffect, useState, type ReactNode } from 'react';
+import { useEffect, useState, type Dispatch, type ReactNode, type SetStateAction } from 'react';
 import {
   ArrowLeft,
   ArrowRight,
@@ -48,10 +48,27 @@ function App() {
   const [isListening, setIsListening] = useState(false);
   const [hintVisible, setHintVisible] = useState(false);
   const [darkMode, setDarkMode] = useState(() => localStorage.getItem('smriti-dark-mode') === 'true');
+  const [reminderTime, setReminderTime] = useState('09:30');
+  const [reminderSet, setReminderSet] = useState(false);
+  const [reminderPlayed, setReminderPlayed] = useState(false);
+
 
   useEffect(() => {
     localStorage.setItem('smriti-dark-mode', String(darkMode));
   }, [darkMode]);
+
+  useEffect(() => {
+    if (!reminderSet) return;
+    const interval = setInterval(() => {
+      const now = new Date();
+      const currentTime = `${String(now.getHours()).padStart(2, '0')}:${String(now.getMinutes()).padStart(2, '0')}`;
+      if (currentTime === reminderTime && !reminderPlayed) {
+        new Audio('/audio/medicine-reminder-morning.mp3').play();
+        setReminderPlayed(true);
+      }
+    }, 5000);
+    return () => clearInterval(interval);
+  }, [reminderSet, reminderTime, reminderPlayed]);
 
   const navigate = (nextView: View) => {
     setView(nextView);
@@ -114,6 +131,12 @@ function App() {
             setIsListening={setIsListening}
             onExercise={() => navigate('exercise')}
             onGames={() => navigate('games')}
+            reminderTime={reminderTime}
+            setReminderTime={setReminderTime}
+            reminderSet={reminderSet}
+            setReminderSet={setReminderSet}
+            reminderPlayed={reminderPlayed}
+            setReminderPlayed={setReminderPlayed}
           />
         )}
         {view === 'exercise' && <ExerciseView hintVisible={hintVisible} setHintVisible={setHintVisible} onBack={() => navigate('home')} />}
@@ -141,7 +164,7 @@ function App() {
   );
 }
 
-function HomeView({ language, medicineDone, setMedicineDone, isListening, setIsListening, onExercise, onGames }: {
+function HomeView({ language, medicineDone, setMedicineDone, isListening, setIsListening, onExercise, onGames, reminderTime, setReminderTime, reminderSet, setReminderSet, setReminderPlayed }: {
   language: Language;
   medicineDone: boolean;
   setMedicineDone: (done: boolean) => void;
@@ -149,6 +172,12 @@ function HomeView({ language, medicineDone, setMedicineDone, isListening, setIsL
   setIsListening: (listening: boolean) => void;
   onExercise: () => void;
   onGames: () => void;
+  reminderTime: string;
+  setReminderTime: (time: string) => void;
+  reminderSet: boolean;
+  setReminderSet: (set: boolean) => void;
+  reminderPlayed: boolean;
+  setReminderPlayed: (played: boolean) => void;
 }) {
   return (
     <div className="page home-page">
@@ -178,6 +207,17 @@ function HomeView({ language, medicineDone, setMedicineDone, isListening, setIsL
         <section className={`plan-card ${medicineDone ? 'completed-card' : ''}`}>
           <div className="plan-icon medicine-icon">+</div>
           <div className="plan-copy"><h3>Medicine reminder</h3><p>{medicineDone ? 'Taken just now' : 'BP tablet · 9:30 AM'}</p></div>
+          <div style={{ marginTop: 8, display: 'flex', gap: 8, alignItems: 'center' }}>
+            <input
+              type="time"
+              value={reminderTime}
+              onChange={(e) => { setReminderTime(e.target.value); setReminderSet(false); setReminderPlayed(false); }}
+            />
+            <button onClick={() => { setReminderSet(true); setReminderPlayed(false); }}>
+              Set reminder
+            </button>
+            {reminderSet && <span style={{ fontSize: 12, opacity: 0.7 }}>Reminder set for {reminderTime}</span>}
+          </div>
           <button className={`check-button ${medicineDone ? 'is-done' : ''}`} onClick={() => setMedicineDone(!medicineDone)} aria-label="Mark medicine as taken"><Check size={21} /></button>
         </section>
         <section className="plan-card exercise-card">
@@ -221,13 +261,15 @@ function ExerciseView({ hintVisible, setHintVisible, onBack }: { hintVisible: bo
     </div>
   );
 }
-
 function CareCircleView() {
+  const history = JSON.parse(localStorage.getItem('gameHistory') || '[]');
+  const latest = history[history.length - 1];
+
   return (
     <div className="page circle-page">
       <div className="page-heading"><div><p className="eyebrow">For family, near or far</p><h1>Care Circle</h1><p className="circle-person">Aita · updated today at 10:12 AM</p></div><div className="updated-time"><span className="live-dot" /> Synced today<br /><strong>at 10:12 AM</strong></div></div>
       <section className="alert-card"><div className="alert-icon">!</div><div><h3>Gentle check-in suggested</h3><p>Aita's routine changed a little this week.</p></div><Bell size={19} /></section>
-      <section className="trend-section"><div className="section-title-row"><div><h2>Cognitive trend</h2><p>Personal baseline, not a diagnosis</p></div><button className="quiet-button"><CircleHelp size={20} /></button></div><div className="chart-card"><div className="chart-labels"><span>80</span><span>60</span><span>40</span></div><svg viewBox="0 0 500 190" className="trend-chart" role="img" aria-label="Gentle trend line over recent weeks"><path d="M0 42 H500 M0 96 H500 M0 150 H500" className="grid-line" /><path d="M18 57 C70 44 92 27 137 41 S205 61 252 57 S321 49 364 81 S411 132 480 119" className="trend-line" /><circle cx="480" cy="119" r="6" className="trend-point" /></svg><div className="chart-months"><span>JUL</span><span>AUG</span><span>THIS WEEK</span></div></div></section>
+      <section className="trend-section"><div className="section-title-row"><div><h2>Cognitive trend</h2><p>Personal baseline, not a diagnosis</p>{latest && <p style={{ marginTop: 4, fontWeight: 600 }}>Latest: {latest.gameName} — score {latest.score}</p>}</div><button className="quiet-button"><CircleHelp size={20} /></button></div><div className="chart-card"><div className="chart-labels"><span>80</span><span>60</span><span>40</span></div><svg viewBox="0 0 500 190" className="trend-chart" role="img" aria-label="Gentle trend line over recent weeks"><path d="M0 42 H500 M0 96 H500 M0 150 H500" className="grid-line" /><path d="M18 57 C70 44 92 27 137 41 S205 61 252 57 S321 49 364 81 S411 132 480 119" className="trend-line" /><circle cx="480" cy="119" r="6" className="trend-point" /></svg><div className="chart-months"><span>JUL</span><span>AUG</span><span>THIS WEEK</span></div></div></section>
       <section className="today-section"><div className="section-title-row"><h2>Today</h2><span className="day-chip">Friday</span></div><div className="today-card"><div className="today-check"><Check size={20} /></div><div><h3>Exercise completed</h3><p>4 of 5 activities · 6 min</p></div><ArrowRight size={18} /></div></section>
       <div className="circle-actions"><button className="call-button"><Phone size={18} fill="currentColor" /> Call Aita</button><button className="share-button"><Share2 size={18} /> Share with ASHA</button></div>
       <p className="human-note"><Heart size={15} fill="currentColor" /> Smriti helps you notice patterns. People make care decisions.</p>
