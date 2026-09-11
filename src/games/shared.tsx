@@ -1,5 +1,6 @@
 import { type CSSProperties, type ReactNode } from 'react';
 import { ArrowLeft, Check, Heart, Info, Lightbulb, Mic, SkipForward, X } from 'lucide-react';
+import { useEffect } from 'react';
 
 export type Language = 'Assamese' | 'Bodo' | 'Khasi' | 'Mizo' | 'Manipuri' | 'Nagamese' | 'Hindi' | 'English';
 
@@ -118,12 +119,22 @@ export function CompletionScreen({
   onDone,
   secondaryLabel,
   onSecondary,
+  gameName,
+  score,
+  timeTakenMs,
 }: {
   message: string;
   onDone: () => void;
   secondaryLabel?: string;
   onSecondary?: () => void;
+  gameName?: string;
+  score?: number;
+  timeTakenMs?: number;
 }) {
+  useEffect(() => {
+    console.log('Round finished:', { gameName, score, timeTakenMs });
+  }, []);
+
   return (
     <div className="completion-screen">
       <div className="bloom-flower">
@@ -145,6 +156,7 @@ export function CompletionScreen({
     </div>
   );
 }
+
 
 export function InstructionsModal({
   title,

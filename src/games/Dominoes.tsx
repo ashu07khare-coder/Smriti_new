@@ -65,6 +65,9 @@ export function Dominoes({ language: _language, onBack }: { language: Language; 
   const [showInstructions, setShowInstructions] = useState(false);
   const [hintText, setHintText] = useState<string | null>(null);
   const [completed, setCompleted] = useState(false);
+  const [startTime] = useState(() => Date.now());
+  const [hintsUsed, setHintsUsed] = useState(0);
+  const [wrongMoves, setWrongMoves] = useState(0);
 
   const leftEnd = board.length > 0 ? board[0].left : null;
   const rightEnd = board.length > 0 ? board[board.length - 1].right : null;
@@ -121,17 +124,22 @@ export function Dominoes({ language: _language, onBack }: { language: Language; 
 
   function checkCompletion(remaining: number) {
     if (remaining <= 0) {
-      // TODO: wire to backend — POST /api/games/session
+      const timeTakenMs = Date.now() - startTime;
+      const score = Math.max(0, 100 - wrongMoves * 10 - hintsUsed * 5 - Math.floor(timeTakenMs / 10000));
+      console.log('Round finished:', { gameName: 'Dominoes', score, timeTakenMs, hintsUsed, wrongMoves });
       setTimeout(() => setCompleted(true), 800);
     }
   }
 
   function handlePlace(tileId: string, side: 'left' | 'right') {
+    const isValid = side === 'left' ? canPlaceLeft : canPlaceRight;
+    if (!isValid && board.length > 0) setWrongMoves((n) => n + 1);
     if (side === 'left') placeOnLeft(tileId);
     else placeOnRight(tileId);
   }
 
   function handleHint() {
+    setHintsUsed((n) => n + 1);
     if (hand.length === 0) {
       setHintText('Your hand is empty — well done!');
       return;
@@ -171,6 +179,8 @@ export function Dominoes({ language: _language, onBack }: { language: Language; 
   }
 
   if (completed) {
+    const timeTakenMs = Date.now() - startTime;
+    const score = Math.max(0, 100 - wrongMoves * 10 - hintsUsed * 5 - Math.floor(timeTakenMs / 10000));
     return <CompletionScreen message="All matched, well done" onDone={onBack} />;
   }
 
