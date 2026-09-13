@@ -62,7 +62,12 @@ function DominoTile({ left, right, size = 'normal' }: { left: number; right: num
 
 export function Dominoes({ language: _language, onBack }: { language: Language; onBack: () => void }) {
   void _language;
-  const [hand, setHand] = useState<DominoData[]>(() => shuffle(dominoSet));
+  const history = JSON.parse(localStorage.getItem('gameHistory') || '[]');
+  const lastScore = history.length > 0 ? history[history.length - 1].score : 100;
+  const activeDominoSet = lastScore < 50 ? dominoSet.slice(0, 4) : dominoSet;
+  console.log('lastScore:', lastScore, 'activeDominoSet length:', activeDominoSet.length);
+
+  const [hand, setHand] = useState<DominoData[]>(() => shuffle(activeDominoSet));
   const [board, setBoard] = useState<DominoData[]>([]);
   const [selectedTile, setSelectedTile] = useState<string | null>(null);
   const [showInstructions, setShowInstructions] = useState(false);
@@ -71,9 +76,6 @@ export function Dominoes({ language: _language, onBack }: { language: Language; 
   const [startTime] = useState(() => Date.now());
   const [hintsUsed, setHintsUsed] = useState(0);
   const [wrongMoves, setWrongMoves] = useState(0);
-  const history = JSON.parse(localStorage.getItem('gameHistory') || '[]');
-  const lastScore = history.length > 0 ? history[history.length - 1].score : 100;
-  const activeDominoSet = lastScore < 50 ? dominoSet.slice(0, 4) : dominoSet;
 
   const leftEnd = board.length > 0 ? board[0].left : null;
   const rightEnd = board.length > 0 ? board[board.length - 1].right : null;
@@ -208,10 +210,10 @@ export function Dominoes({ language: _language, onBack }: { language: Language; 
       <GameHeader eyebrow="Match the tiles" title="Dominoes" onBack={onBack} onInstructions={() => setShowInstructions(true)} />
 
       <div className="progress-meta">
-        <span>{board.length} of {dominoSet.length} placed</span>
+        <span>{board.length} of {activeDominoSet.length} placed</span>
         <span>Take your time</span>
       </div>
-      <div className="progress-track"><span style={{ width: `${(board.length / dominoSet.length) * 100}%` }} /></div>
+      <div className="progress-track"><span style={{ width: `${(board.length / activeDominoSet.length) * 100}%` }} /></div>
 
       {hintText && <HintCard text={hintText} onClose={() => setHintText(null)} />}
 
