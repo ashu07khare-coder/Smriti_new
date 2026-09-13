@@ -11,6 +11,7 @@ import type { Language } from './shared';
 import { smritiApi } from '@/services/api';
 import { queueOfflineMutation } from '@/services/offlineSync';
 
+
 interface DominoData {
   id: string;
   left: number;
@@ -70,6 +71,9 @@ export function Dominoes({ language: _language, onBack }: { language: Language; 
   const [startTime] = useState(() => Date.now());
   const [hintsUsed, setHintsUsed] = useState(0);
   const [wrongMoves, setWrongMoves] = useState(0);
+  const history = JSON.parse(localStorage.getItem('gameHistory') || '[]');
+  const lastScore = history.length > 0 ? history[history.length - 1].score : 100;
+  const activeDominoSet = lastScore < 50 ? dominoSet.slice(0, 4) : dominoSet;
 
   const leftEnd = board.length > 0 ? board[0].left : null;
   const rightEnd = board.length > 0 ? board[board.length - 1].right : null;
@@ -128,17 +132,12 @@ export function Dominoes({ language: _language, onBack }: { language: Language; 
     if (remaining <= 0) {
       const timeTakenMs = Date.now() - startTime;
       const score = Math.max(0, 100 - wrongMoves * 10 - hintsUsed * 5 - Math.floor(timeTakenMs / 10000));
-      console.log('Round finished:', { gameName: 'Dominoes', score, timeTakenMs, hintsUsed, wrongMoves });
-      
-      const payload = {
-        gameName: 'Dominoes',
-        score,
-        timeTakenMs,
-        hintsUsed,
-        wrongMoves,
-        completed: true,
-      };
+      const session = { gameName: 'Dominoes', score, timeTakenMs, hintsUsed, wrongMoves, date: new Date().toISOString() };
+      const newHistory = JSON.parse(localStorage.getItem('gameHistory') || '[]');
+      newHistory.push(session);
+      localStorage.setItem('gameHistory', JSON.stringify(newHistory));
 
+      const payload = { gameName: 'Dominoes', score, timeTakenMs, hintsUsed, wrongMoves, completed: true };
       smritiApi.recordGameSession(payload).catch(() => {
         queueOfflineMutation({
           table: 'exercise_sessions',
@@ -147,7 +146,6 @@ export function Dominoes({ language: _language, onBack }: { language: Language; 
           data: payload,
         });
       });
-
       setTimeout(() => setCompleted(true), 800);
     }
   }
@@ -202,7 +200,7 @@ export function Dominoes({ language: _language, onBack }: { language: Language; 
   if (completed) {
     const timeTakenMs = Date.now() - startTime;
     const score = Math.max(0, 100 - wrongMoves * 10 - hintsUsed * 5 - Math.floor(timeTakenMs / 10000));
-    return <CompletionScreen message="All matched, well done" onDone={onBack} />;
+    return <CompletionScreen message="All matched, well done" onDone={onBack} gameName="Dominoes" score={score} timeTakenMs={timeTakenMs} />;
   }
 
   return (
