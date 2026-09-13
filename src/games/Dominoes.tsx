@@ -8,6 +8,8 @@ import {
   shuffle,
 } from './shared';
 import type { Language } from './shared';
+import { smritiApi } from '@/services/api';
+import { queueOfflineMutation } from '@/services/offlineSync';
 
 
 interface DominoData {
@@ -131,9 +133,19 @@ export function Dominoes({ language: _language, onBack }: { language: Language; 
       const timeTakenMs = Date.now() - startTime;
       const score = Math.max(0, 100 - wrongMoves * 10 - hintsUsed * 5 - Math.floor(timeTakenMs / 10000));
       const session = { gameName: 'Dominoes', score, timeTakenMs, hintsUsed, wrongMoves, date: new Date().toISOString() };
-      const history = JSON.parse(localStorage.getItem('gameHistory') || '[]');
-      history.push(session);
-      localStorage.setItem('gameHistory', JSON.stringify(history));
+      const newHistory = JSON.parse(localStorage.getItem('gameHistory') || '[]');
+      newHistory.push(session);
+      localStorage.setItem('gameHistory', JSON.stringify(newHistory));
+
+      const payload = { gameName: 'Dominoes', score, timeTakenMs, hintsUsed, wrongMoves, completed: true };
+      smritiApi.recordGameSession(payload).catch(() => {
+        queueOfflineMutation({
+          table: 'exercise_sessions',
+          id: `sess-${Date.now()}-${Math.random().toString(36).substring(2, 6)}`,
+          action: 'UPSERT',
+          data: payload,
+        });
+      });
       setTimeout(() => setCompleted(true), 800);
     }
   }
@@ -188,7 +200,7 @@ export function Dominoes({ language: _language, onBack }: { language: Language; 
   if (completed) {
     const timeTakenMs = Date.now() - startTime;
     const score = Math.max(0, 100 - wrongMoves * 10 - hintsUsed * 5 - Math.floor(timeTakenMs / 10000));
-    return <CompletionScreen message="All matched, well done" onDone={onBack} />;
+    return <CompletionScreen message="All matched, well done" onDone={onBack} gameName="Dominoes" score={score} timeTakenMs={timeTakenMs} />;
   }
 
   return (

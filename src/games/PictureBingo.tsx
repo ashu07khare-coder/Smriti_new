@@ -9,6 +9,8 @@ import {
   shuffle,
 } from './shared';
 import type { Language } from './shared';
+import { smritiApi } from '@/services/api';
+import { queueOfflineMutation } from '@/services/offlineSync';
 
 interface PictureItem {
   id: string;
@@ -73,13 +75,24 @@ export function PictureBingo({ language, onBack }: { language: Language; onBack:
     };
   }, []);
 
-  function finishRound() {
+    function finishRound() {
     const timeTakenMs = Date.now() - startTime;
     const score = Math.max(0, 100 - wrongMoves * 10 - hintsUsed * 5 - Math.floor(timeTakenMs / 10000));
     const session = { gameName: 'Picture Bingo', score, timeTakenMs, hintsUsed, wrongMoves, date: new Date().toISOString() };
     const history = JSON.parse(localStorage.getItem('gameHistory') || '[]');
     history.push(session);
     localStorage.setItem('gameHistory', JSON.stringify(history));
+
+    const payload = { gameName: 'Picture Bingo', score, timeTakenMs, hintsUsed, wrongMoves, completed: true };
+    smritiApi.recordGameSession(payload).catch(() => {
+      queueOfflineMutation({
+        table: 'exercise_sessions',
+        id: `sess-${Date.now()}-${Math.random().toString(36).substring(2, 6)}`,
+        action: 'UPSERT',
+        data: payload,
+      });
+    });
+
     setTimeout(() => setCompleted(true), 800);
   }
 

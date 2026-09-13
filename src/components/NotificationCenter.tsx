@@ -15,6 +15,7 @@ import {
   type LucideIcon,
 } from 'lucide-react';
 import type { Language } from '@/games/shared';
+import { smritiApi } from '@/services/api';
 
 export type NotificationType = 'medicine' | 'exercise' | 'family' | 'care' | 'general';
 
@@ -170,8 +171,19 @@ export function NotificationCenter({ language }: NotificationCenterProps) {
     firstButton?.focus();
   }, [open]);
 
+  useEffect(() => {
+    smritiApi.getNotifications().then((data) => {
+      if (Array.isArray(data) && data.length > 0) {
+        setNotifications(data);
+      }
+    }).catch(() => {
+      // Offline fallback
+    });
+  }, []);
+
   const markAllRead = () => {
     setNotifications((prev) => prev.map((n) => ({ ...n, read: true })));
+    smritiApi.markAllNotificationsRead().catch(() => {});
   };
 
   const clearAll = () => {
@@ -181,6 +193,7 @@ export function NotificationCenter({ language }: NotificationCenterProps) {
 
   const toggleRead = (id: string) => {
     setNotifications((prev) => prev.map((n) => (n.id === id ? { ...n, read: !n.read } : n)));
+    smritiApi.toggleNotificationRead(id).catch(() => {});
   };
 
   const removeNotification = (id: string) => {

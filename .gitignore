@@ -21,3 +21,9 @@ dist-ssr
 *.sln
 *.sw?
 .env
+.env.*
+*.db
+*.db-journal
+*.db-wal
+*.db-shm
+server/data/
